@@ -2,6 +2,8 @@
 
 This is a VS Code extension that adds inlay hints for C++ code, making them clickable, just like `.md` (*Markdown*) links, providing additional information such as ordinal, address, and size directly in the editor.
 
+![vscode-cpp-inlay-links](images/vscode-cpp-inlay-example.png)
+
 ## Purpose
 
 Some small context behind this extension: The open-source Nintendo DS clean-room, experimental, decompilation project of the 2004 game [*Super Mario 64 DS*](https://github.com/tangosdev/sm64ds-decomp), known as `sm64ds-decomp`, introduced, with PR [#2670](https://github.com/tangosdev/sm64ds-decomp/pull/2670), and reorganized the codebase, resulting in new cases of code cleanup comments prefixed with `// @symbol` such as:
