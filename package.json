@@ -48,7 +48,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -w -p ./",
+    "watch": "tsc -w -p ./"
   },
   "devDependencies": {
     "@types/node": "18.8.2",
