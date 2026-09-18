@@ -1,0 +1,58 @@
+{
+  "name": "vscode-inlay-links",
+  "displayName": "CPP Inlay Links",
+  "description": "Shows clickable ROM metadata inlays for C++ `@symbol` comments backed by `sm64ds-decomp` TU manifests.",
+  "version": "1.0.0",
+  "publisher": "Alberto Pilotto",
+  "license": "MIT",
+  "keywords": [
+    "inlay hints",
+    "clickable",
+    "cpp",
+    "decompilation",
+    "symbols",
+    "sm64ds-decomp"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alberto12345678999/vscode-cpp-inlay-links.git"
+  },
+  "engines": {
+    "vscode": "^1.71.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:cpp",
+    "onCommand:cppInlayLinks.openManifestEntry"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cppInlayLinks.openManifestEntry",
+        "title": "Open TU Manifest Entry",
+        "category": "CPP Inlay Links"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "cppInlayLinks.openManifestEntry",
+          "when": "false"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+  },
+  "devDependencies": {
+    "@types/node": "18.8.2",
+    "@types/vscode": "^1.71.0",
+    "typescript": "^4.8.4"
+  }
+}
