@@ -16,7 +16,7 @@ Inside the [src/game/actors/daBrq_c.cpp](https://github.com/tangosdev/sm64ds-dec
  int daBrq_c::CleanupResources()
 ```
 
- However, the `cpp` file out-of-the-box does not provide any information in it's comments about the function's parameters or return type. It's just a plain comment text.
+ However, the `cpp` file out-of-the-box does not provide any information in it's comments about the symbol's ordinal and size. It's just a plain comment text.
 
 ### Case-study
 
