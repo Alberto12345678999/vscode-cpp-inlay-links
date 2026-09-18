@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 
 const MANIFEST_GLOB = '**/config/tu_manifest.d/**/*.json';
 
+/*
+    * Represents a function entry in a translation unit manifest.
+*/
 interface ManifestFunction {
     symbol?: unknown;
     address?: unknown;
@@ -9,12 +12,18 @@ interface ManifestFunction {
     ordinal?: unknown;
 }
 
+/*
+    * Represents a translation unit manifest.
+*/
 interface TranslationUnitManifest {
     source?: unknown;
     promoted_source?: unknown;
     functions?: unknown;
 }
 
+/*
+    * Command to open a manifest entry in the editor.
+*/
 export interface ManifestEntry {
     readonly symbol: string;
     readonly address?: string;
@@ -25,6 +34,9 @@ export interface ManifestEntry {
     readonly selection: vscode.Range;
 }
 
+/*
+    * Represents the index of all manifest entries in the workspace.
+*/
 export class ManifestIndex implements vscode.Disposable {
     private readonly changedEmitter = new vscode.EventEmitter<void>();
     private readonly watcher: vscode.FileSystemWatcher;
@@ -129,14 +141,25 @@ export class ManifestIndex implements vscode.Disposable {
         return entries;
     }
 }
-
+/**
+ * Extracts the source path from a translation unit manifest.
+ * @param manifest The translation unit manifest.
+ * @returns The source path, or undefined if it cannot be determined.
+ */
 function manifestSource(manifest: TranslationUnitManifest): string | undefined {
     const source = typeof manifest.promoted_source === 'string'
         ? manifest.promoted_source
         : manifest.source;
     return typeof source === 'string' ? normalizePath(source) : undefined;
 }
-
+/**
+ * Parses a manifest function into a manifest entry.
+ * @param candidate The manifest function to parse.
+ * @param source The source path.
+ * @param manifest The manifest URI.
+ * @param manifestText The manifest text.
+ * @returns The parsed manifest entry, or undefined if it cannot be parsed.
+ */
 function parseEntry(
     candidate: ManifestFunction,
     source: string,
@@ -167,7 +190,12 @@ function parseEntry(
         selection: new vscode.Range(start, end)
     };
 }
-
+/**
+ * Finds the offset of a function's symbol in the manifest text.
+ * @param manifestText The manifest text.
+ * @param symbolText The symbol text.
+ * @returns The offset of the symbol, or -1 if it is not found.
+ */
 function findFunctionSymbolOffset(manifestText: string, symbolText: string): number {
     const functionsOffset = manifestText.indexOf('"functions"');
     if (functionsOffset < 0) {
@@ -179,15 +207,30 @@ function findFunctionSymbolOffset(manifestText: string, symbolText: string): num
     const match = property.exec(manifestText.slice(functionsOffset));
     return match ? functionsOffset + match.index + match[0].lastIndexOf(symbolText) : -1;
 }
-
+/**
+ * Generates a unique key for a manifest entry based on its workspace folder, source, and symbol.
+ * @param workspaceFolder The workspace folder.
+ * @param source The source path.
+ * @param symbol The symbol.
+ * @returns The generated key.
+ */
 function entryKey(workspaceFolder: vscode.Uri, source: string, symbol: string): string {
     return `${workspaceFolder.toString()}\0${normalizePath(source)}\0${symbol}`;
 }
-
+/**
+ * Normalizes a path by replacing backslashes with forward slashes and removing the leading './'.
+ * @param value Path of the string to normalize.
+ * @returns The replaced string.
+ */
 function normalizePath(value: string): string {
     return value.replace(/\\/g, '/').replace(/^\.\//, '');
 }
-
+/**
+ * Returns the position of a character in a string.
+ * @param text The string to search.
+ * @param offset The offset of the character.
+ * @returns The position of the character.
+ */
 function positionAt(text: string, offset: number): vscode.Position {
     const prefix = text.slice(0, offset);
     const lines = prefix.split(/\r?\n/);

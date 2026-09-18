@@ -4,6 +4,9 @@ import { ManifestEntry, ManifestIndex } from './manifestIndex';
 const OPEN_MANIFEST_COMMAND = 'cppInlayLinks.openManifestEntry';
 const SYMBOL_COMMENT = /^\s*\/\/\s*@symbol\s+([^\s]+)/;
 
+/*
+ * Provides inlay hints for C++ `@symbol` comments, allowing users to click on the inlay to navigate to the corresponding manifest entry.
+*/
 class SymbolInlayProvider implements vscode.InlayHintsProvider {
     readonly onDidChangeInlayHints: vscode.Event<void>;
 
@@ -54,6 +57,9 @@ class SymbolInlayProvider implements vscode.InlayHintsProvider {
     }
 }
 
+/*
+    * Activates the extension, registering the inlay hints provider and the command to open manifest entries.
+*/
 export function activate(context: vscode.ExtensionContext): void {
     const index = new ManifestIndex();
     const provider = vscode.languages.registerInlayHintsProvider(
@@ -83,6 +89,11 @@ export function deactivate(): void {
     // VS Code disposes everything registered in the extension context.
 }
 
+/**
+ * Formats the label for an inlay hint based on the manifest entry.
+ * @param entry The manifest entry to format.
+ * @returns The formatted label.
+ */
 function formatLabel(entry: ManifestEntry): string {
     const parts = [`ROM #${entry.ordinal}`];
     if (entry.address) {
