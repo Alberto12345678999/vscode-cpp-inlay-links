@@ -3,7 +3,7 @@
   "displayName": "CPP Inlay Links",
   "description": "Shows clickable ROM metadata inlays for C++ `@symbol` comments backed by `sm64ds-decomp` TU manifests.",
   "version": "1.0.0",
-  "publisher": "Alberto Pilotto",
+  "publisher": "alberto-pilotto",
   "license": "MIT",
   "keywords": [
     "inlay hints",
