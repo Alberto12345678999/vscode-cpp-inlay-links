@@ -25,6 +25,7 @@
   ],
   "activationEvents": [
     "onLanguage:cpp",
+    "onLanguage:c",
     "onCommand:cppInlayLinks.openManifestEntry"
   ],
   "main": "./out/extension",

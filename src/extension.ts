@@ -63,7 +63,7 @@ class SymbolInlayProvider implements vscode.InlayHintsProvider {
 export function activate(context: vscode.ExtensionContext): void {
     const index = new ManifestIndex();
     const provider = vscode.languages.registerInlayHintsProvider(
-        { language: 'cpp', scheme: 'file' },
+        [{ language: 'cpp', scheme: 'file' }, { language: 'c', scheme: 'file' }],
         new SymbolInlayProvider(index)
     );
     const navigation = vscode.commands.registerCommand(

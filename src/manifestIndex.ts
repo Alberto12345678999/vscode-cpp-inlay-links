@@ -34,6 +34,11 @@ export interface ManifestEntry {
     readonly selection: vscode.Range;
 }
 
+interface ManifestEntries {
+   readonly bySource: Map<string, ManifestEntry>;
+   readonly bySymbol: Map<string, ManifestEntry[]>;
+}
+
 /*
     * Represents the index of all manifest entries in the workspace.
 */
@@ -41,8 +46,8 @@ export class ManifestIndex implements vscode.Disposable {
     private readonly changedEmitter = new vscode.EventEmitter<void>();
     private readonly watcher: vscode.FileSystemWatcher;
     private readonly subscriptions: vscode.Disposable[];
-    private entries: Map<string, ManifestEntry> | undefined;
-    private loading: Promise<Map<string, ManifestEntry>> | undefined;
+    private entries: ManifestEntries | undefined;
+    private loading: Promise<ManifestEntries> | undefined;
     private revision = 0;
 
     readonly onDidChange = this.changedEmitter.event;
@@ -66,7 +71,21 @@ export class ManifestIndex implements vscode.Disposable {
 
         const source = normalizePath(vscode.workspace.asRelativePath(document.uri, false));
         const entries = await this.load();
-        return entries.get(entryKey(folder.uri, source, symbol));
+
+        // First, prefer the existing exact source-path + symbol match.
+        const exactEntry = entries.bySource.get(entryKey(folder.uri, source, symbol));
+        if (exactEntry) {
+            return exactEntry;
+        }
+
+        // If the comment is in a header or another file, try the symbol globally
+        // within the current workspace.
+        const candidates = entries.bySymbol.get(
+            symbolKey(folder.uri, symbol)
+        );
+
+        //Avoid choosing an arbitrary manifest when the symbol is duplicated.
+        return candidates?.length === 1 ? candidates[0] : undefined;
     }
 
     dispose(): void {
@@ -83,7 +102,7 @@ export class ManifestIndex implements vscode.Disposable {
         this.changedEmitter.fire();
     }
 
-    private load(): Promise<Map<string, ManifestEntry>> {
+    private load(): Promise<ManifestEntries> {
         if (this.entries) {
             return Promise.resolve(this.entries);
         }
@@ -108,8 +127,9 @@ export class ManifestIndex implements vscode.Disposable {
         return this.loading;
     }
 
-    private async build(): Promise<Map<string, ManifestEntry>> {
-        const entries = new Map<string, ManifestEntry>();
+    private async build(): Promise<ManifestEntries> {
+        const BySource = new Map<string, ManifestEntry>();
+        const BySymbol = new Map<string, ManifestEntry[]>();
         const manifests = await vscode.workspace.findFiles(
             MANIFEST_GLOB,
             '**/{.git,node_modules}/**'
@@ -130,7 +150,10 @@ export class ManifestIndex implements vscode.Disposable {
                 for (const candidate of manifest.functions as ManifestFunction[]) {
                     const entry = parseEntry(candidate, source, manifestUri, text);
                     if (entry) {
-                        entries.set(entryKey(folder.uri, source, entry.symbol), entry);
+                        BySource.set(entryKey(folder.uri, source, entry.symbol), entry);
+                        const entries = BySymbol.get(entry.symbol) || [];
+                        entries.push(entry);
+                        BySymbol.set(entry.symbol, entries);
                     }
                 }
             } catch (error) {
@@ -138,7 +161,7 @@ export class ManifestIndex implements vscode.Disposable {
             }
         }));
 
-        return entries;
+        return { bySource: BySource, bySymbol: BySymbol };
     }
 }
 /**
@@ -206,6 +229,15 @@ function findFunctionSymbolOffset(manifestText: string, symbolText: string): num
     const property = new RegExp(`"symbol"\\s*:\\s*${escapedSymbol}`);
     const match = property.exec(manifestText.slice(functionsOffset));
     return match ? functionsOffset + match.index + match[0].lastIndexOf(symbolText) : -1;
+}
+/**
+ * Generates a unique key for a symbol based on its workspace folder and symbol.
+ * @param workspaceFolder The workspace folder.
+ * @param symbol The symbol.
+ * @returns The generated key.
+ */
+function symbolKey(workspaceFolder: vscode.Uri, symbol: string): string {
+    return `${workspaceFolder.toString()}\0${symbol}`;
 }
 /**
  * Generates a unique key for a manifest entry based on its workspace folder, source, and symbol.
