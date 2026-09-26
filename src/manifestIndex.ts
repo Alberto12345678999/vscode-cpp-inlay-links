@@ -151,9 +151,11 @@ export class ManifestIndex implements vscode.Disposable {
                     const entry = parseEntry(candidate, source, manifestUri, text);
                     if (entry) {
                         BySource.set(entryKey(folder.uri, source, entry.symbol), entry);
-                        const entries = BySymbol.get(entry.symbol) || [];
-                        entries.push(entry);
-                        BySymbol.set(entry.symbol, entries);
+                        const key = symbolKey(folder.uri, entry.symbol);
+                        const candidates = BySymbol.get(key) ?? [];
+
+                        candidates.push(entry);
+                        BySymbol.set(key, candidates);
                     }
                 }
             } catch (error) {
