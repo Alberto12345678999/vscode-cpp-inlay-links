@@ -2,7 +2,7 @@
   "name": "vscode-inlay-links",
   "displayName": "CPP Inlay Links",
   "description": "Shows clickable ROM metadata inlays for C++ `@symbol` comments backed by `sm64ds-decomp` TU manifests.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "alberto-pilotto",
   "license": "MIT",
   "keywords": [
